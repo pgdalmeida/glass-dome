@@ -160,4 +160,5 @@ cython_debug/
 #.idea/
 
 # Glass-dome specific
-DAR_zip_files
+data
+
