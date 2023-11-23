@@ -5,12 +5,13 @@ Tools to improve the scrutiny of elected officials by the citizens
 
 * Crawling:
     * Create data pipelines (only download new data)
+        * make AR_downloader only download new files
     * Make it automatically run periodically
+        * Integrate the crawling and download in and Airflow dag
 
 * Data Preparation:
-    * Unzip all files
-    * Load JSON files and extract relevant text
-    * Fix text 
+    * Load JSON files
+    * Clean data
         * Remove html tags
         * replace special codes for non ascii characters
 
