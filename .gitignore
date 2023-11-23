@@ -161,4 +161,6 @@ cython_debug/
 
 # Glass-dome specific
 data
-
+AR_crawler_runs
+AR_crawler_logs
+AR_downloader_runs
