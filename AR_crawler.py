@@ -25,7 +25,7 @@ class ARSpider(scrapy.Spider):
         }
     
     # list that will gather all crawled files urls and directories in csv format to be written to a file at the end of the crawler run
-    crawler_output = ['directory,parent_url,file_url']
+    crawler_output = ['crawl_time,file_path,parent_url,file_url']
 
     def clean_string(self, string):
         ''' Clean, normalize characters, replace white space by underscores, etc. 
@@ -97,7 +97,7 @@ class ARSpider(scrapy.Spider):
                 file_name = file_name.lower()
                 file_path = os.path.join(directory, file_name)
                 logging.info(f'Registering file: {file_name}')
-                self.crawler_output.append(f'{file_path},{response.url},{url}')
+                self.crawler_output.append(f'{datetime.datetime.now()},{file_path},{response.url},{url}')
         
         for url in urls_to_follow:
             self.excluded_urls.append(url)
