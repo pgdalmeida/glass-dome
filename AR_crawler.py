@@ -4,30 +4,9 @@ import os
 import logging
 import unidecode
 import datetime
+from tqdm import tqdm
 
-
-class ARSpider(scrapy.Spider):
-    '''Spider to crawl and download data from the Assembleia's 
-    open data page https://www.parlamento.pt/Cidadania/Paginas/DadosAbertos.aspx'''
-    
-    name = 'arspider'
-    excluded_urls = []
-    run_datetime = datetime_string = datetime.datetime.now().strftime('%Y_%m_%d_%H_%M_%S')
-
-    # set custom settings
-    custom_settings = {
-        'AUTOTHROTTLE_ENABLED': True,
-        'AUTOTHROTTLE_START_DELAY': 0.2,
-        'AUTOTHROTTLE_MAX_DELAY': 0.5,
-        'DOWNLOAD_DELAY': 0.5,
-        'LOG_LEVEL':'INFO',
-        'LOG_FILE': os.path.join('AR_crawler_logs', f'{run_datetime}.log')
-        }
-    
-    # list that will gather all crawled files urls and directories in csv format to be written to a file at the end of the crawler run
-    crawler_output = ['crawl_time,file_path,parent_url,file_url']
-
-    def clean_string(self, string):
+def clean_string(string):
         ''' Clean, normalize characters, replace white space by underscores, etc. 
         Shouldn't be used on directories as it removes forward slashes.'''
 
@@ -40,6 +19,28 @@ class ARSpider(scrapy.Spider):
         string = string.lower()
         logging.debug(f'##################### cleaned string: {string}')
         return string
+
+class ARSpider(scrapy.Spider):
+    '''Spider to crawl and download data from the Assembleia's 
+    open data page https://www.parlamento.pt/Cidadania/Paginas/DadosAbertos.aspx'''
+    
+    name = 'arspider'
+    excluded_urls = []
+    run_datetime = datetime.datetime.now().strftime('%Y_%m_%d_%H_%M_%S')
+    
+    # Setup progress bar for the command line (estimated number of links to crawl = 7899)
+    pbar = tqdm(total=7899, unit='files')
+    # set custom settings
+    custom_settings = {
+        'AUTOTHROTTLE_ENABLED': True,
+        'AUTOTHROTTLE_START_DELAY': 0.2,
+        'AUTOTHROTTLE_MAX_DELAY': 0.5,
+        'DOWNLOAD_DELAY': 0.5,
+        'LOG_LEVEL':'WARNING',
+        'LOG_FILE': os.path.join('AR_crawler_logs', f'{run_datetime}.log')
+        }
+    # list that will gather all crawled files urls and directories in csv format to be written to a file at the end of the crawler run
+    crawler_output = ['crawl_time,file_path,parent_url,file_url']
 
     def start_requests(self):
         start_urls = ['https://www.parlamento.pt/Cidadania/Paginas/DadosAbertos.aspx']
@@ -73,7 +74,7 @@ class ARSpider(scrapy.Spider):
             breadcrumbs.extend(response.css('div.breadcrumb-container ::text').extract()) # gather remaining directory from breadcrumbs
             
             # clean, normalize characters, replace white space by underscores and remove unwanted elements of the list before creating a string
-            breadcrumbs = [self.clean_string(bc) for bc in breadcrumbs if bc.replace('>', '').strip() != '']
+            breadcrumbs = [clean_string(bc) for bc in breadcrumbs if bc.replace('>', '').strip() != '']
             if 'inicio' in breadcrumbs:
                 breadcrumbs.remove('inicio')
             if breadcrumbs[-1].startswith('numero'):
@@ -96,8 +97,9 @@ class ARSpider(scrapy.Spider):
                 file_name = file_name.replace('%c3%ba', 'u')
                 file_name = file_name.lower()
                 file_path = os.path.join(directory, file_name)
-                logging.info(f'Registering file: {file_name}')
                 self.crawler_output.append(f'{datetime.datetime.now()},{file_path},{response.url},{url}')
+                self.pbar.update(1) # update progress bar
+                self.pbar.set_description(f'Registering: {file_path}')
         
         for url in urls_to_follow:
             self.excluded_urls.append(url)
