@@ -19,9 +19,7 @@ def get_last_run(runs_dir):
     runs_dir_list.sort(reverse=True) # list sorted from recent to older dates
     return runs_dir_list[0] # most recent log selected
 
-
-if __name__ == '__main__':
-    
+def ar_downloader():
     # setup the requests to make the get() method resilient to failiures 
     # (see https://stackoverflow.com/questions/15431044/can-i-set-max-retries-for-requests-request)
     s = requests.Session()
@@ -86,3 +84,8 @@ if __name__ == '__main__':
     run_df.to_csv(run_name, index=False)
     # close progress bar
     pbar.close()
+
+
+if __name__ == '__main__':
+    ar_downloader()
+    

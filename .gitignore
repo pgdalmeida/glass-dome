@@ -161,7 +161,7 @@ cython_debug/
 
 # Glass-dome specific
 data
-data_backup
+backup
 AR_crawler_runs
 AR_crawler_logs
 AR_downloader_runs

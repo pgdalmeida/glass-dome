@@ -13,9 +13,9 @@ def clean_string(string):
         logging.debug(f'##################### string to be cleaned: {string}')
         string = unidecode.unidecode(string)
         string = string.strip()
+        string = string.replace('/', '')
         string = string.replace('  ', '_')
         string = string.replace(' ', '_')
-        string = string.replace('/', '')
         string = string.lower()
         logging.debug(f'##################### cleaned string: {string}')
         return string
@@ -37,7 +37,7 @@ class ARSpider(scrapy.Spider):
         'AUTOTHROTTLE_MAX_DELAY': 0.5,
         'DOWNLOAD_DELAY': 0.5,
         'LOG_LEVEL':'WARNING',
-        'LOG_FILE': os.path.join('AR_crawler_logs', f'{run_datetime}.log')
+        'LOG_FILE': os.path.join('..', 'AR_crawler_logs', f'{run_datetime}.log')
         }
     # list that will gather all crawled files urls and directories in csv format to be written to a file at the end of the crawler run
     crawler_output = ['crawl_time,file_path,parent_url,file_url']
@@ -113,12 +113,14 @@ class ARSpider(scrapy.Spider):
         with open(file_path, 'w') as f:
             f.write('\n'.join(self.crawler_output))
                 
-                
-if __name__ == '__main__':
-
+def start_ar_crawler():
     # Run the Spider
     os.makedirs('AR_crawler_runs', exist_ok=True) # make sure the 'crawler_runs' directory exists and if not create it
     os.makedirs('AR_crawler_logs', exist_ok=True)
     process = CrawlerProcess()
     process.crawl(ARSpider)
     process.start()
+
+if __name__ == '__main__':
+    start_ar_crawler()
+    
