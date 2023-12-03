@@ -27,7 +27,7 @@ def dequote(s):
     s.replace('\n', '')
     s = s.strip()
     if (len(s) >= 2 and s[0] == s[-1]) and s.startswith(("'", '"')):
-        return s[1:-1]
+        return s[1:-1].strip()
     return s.strip()
 
 
@@ -35,21 +35,16 @@ def dequote(s):
 with open(file_path, 'r') as file:
     json = json.load(file)
 
-columns = [
-    'mp_id',            # member of parliament (deputado) identifier from the original data source
-    'mp_name',          # member of parliament (deputado) name, the simplified name or parliamentary name 
-    'mp_party',         # member of parliament (deputado) party
-    'mp_status',        # member of parliament (deputado) status, as in currently active or not
-    'act_id',           # activity identifier from the original data source
-    'act_type',         # activity type, based on what data structure it was sourced from
-    'act_subtype',      # activity subtype, further information on the type of activity
-    'act_dar',          # best guess at where this activity can be found in the "Diario da Republica" (often dificult to find)
-    'act_date',         # date of activity or inicial date when it spans multiple days
-    'act_desc'          # activity description for long form description when aplicable
-]
-
-mp_act_df = pd.DataFrame(columns=columns)
-
+mp_id_column = []            # member of parliament (deputado) identifier from the original data source
+mp_name_column = []          # member of parliament (deputado) name, the simplified name or parliamentary name 
+mp_party_column = []         # member of parliament (deputado) party
+mp_status_column = []        # member of parliament (deputado) status, as in currently active or not
+act_id_column = []           # activity identifier from the original data source
+act_type_column = []         # activity type, based on what data structure it was sourced from
+act_subtype_column = []      # activity subtype, further information on the type of activity
+act_dar_column = []          # best guess at where this activity can be found in the "Diario da Republica" (often dificult to find)
+act_date_column = []         # date of activity or inicial date when it spans multiple days
+act_desc_column = []         # activity description for long form description when aplicable
 
 #####################################################
 #       Info on the member of parlamient (mp)       #
@@ -186,62 +181,92 @@ for i in json['ArrayOfAtividadeDeputado']['AtividadeDeputado']:
                 act_subtype = activity['actTpdesc']
                 act_dar = f"{activity['actNr']}"
                 act_date = activity['accDtaud']
-                act_desc = dequote(get_fist_existing_key(activity, ['actAs', 'nomeEntidadeExterna'])).strip()
+                act_desc = dequote(get_fist_existing_key(activity, ['actAs', 'nomeEntidadeExterna']))
             elif act_type == 'adc':
                 act_id = activity['actId']
                 act_subtype = activity['actTpdesc']
                 act_dar = f"{activity['actNr']}/{activity['actLg']}"
                 act_date = activity['accDtaud']
-                act_desc = dequote(get_fist_existing_key(activity, ['actAs', 'nomeEntidadeExterna'])).strip()
+                act_desc = dequote(get_fist_existing_key(activity, ['actAs', 'nomeEntidadeExterna']))
             elif act_type == 'tra':
                 act_id = activity['actId']
                 act_subtype = activity['actTp']
                 act_dar = f"{activity['cmsAb']}/{activity['actLg']}"
                 act_date = activity['actDtdes1']
-                act_desc = dequote(activity['actAs']).strip()
+                act_desc = dequote(activity['actAs'])
             elif act_type == 'eve':
                 act_id = activity['actId']
                 act_subtype = activity['tevTp']
                 act_dar = f"{activity['cmsAb']}/{activity['actLg']}"
                 act_date = activity['actDtent']
-                act_desc = dequote(activity['actAs']).strip()
+                act_desc = dequote(activity['actAs'])
             elif act_type == 'ini':
                 act_id = activity['iniId']
                 act_subtype = activity['iniTpdesc']
                 act_dar = f"{activity['iniNr']}/{activity['iniTp']}/{activity['iniSelLg']}/{activity['iniSelNr']}"
                 act_date = ''
-                act_desc = dequote(activity['iniTi']).strip()
+                act_desc = dequote(activity['iniTi'])
             elif act_type == 'int':
                 act_id = activity['intId']
                 act_subtype = activity['tinDs']
                 act_dar = f"{activity['pubTp']}/{activity['pubNr']}/{activity['pubLg']}/{activity['pubSl']}"
                 act_date = activity['pubDtreu']
-                act_desc = dequote(get_fist_existing_key(activity, ['intSu'])).strip()
-            elif act_type == 'rel':
+                act_desc = dequote(get_fist_existing_key(activity, ['intSu']))
+            elif act_type == 'rin':
                 act_id = activity['iniId']
                 act_subtype = activity['iniTp']
                 act_dar = f"{activity['iniNr']}/{activity['iniSelLg']}"
                 act_date = ''
-                act_desc = dequote(activity['iniTi']).strip()
+                act_desc = dequote(activity['iniTi'])
+            elif act_type == 'rpe':
+                act_id = activity['petId']
+                act_subtype = 'peticao'
+                act_dar = f"{activity['petNr']}/{activity['petSelLgPk']}/{activity['petSelNrPk']}"
+                act_date = ''
+                act_desc = dequote(activity['petAspet'])
+            elif act_type == 'rie':
+                act_id = activity['ineId']
+                act_subtype = activity['ineReferencia']
+                act_dar = f"{activity['leg']}"
+                act_date = activity['ineDataRelatorio']
+                act_desc = dequote(activity['ineTitulo'])
+            elif act_type == 'rcp':
+                act_id = activity['actId']
+                act_subtype = activity['actTp']
+                act_dar = ''
+                act_date = ''
+                act_desc = dequote(activity['actAs'])
             elif act_type == 'req':
                 act_id = activity['reqId']
                 act_subtype = activity['reqPerTp']
                 act_dar = f"{activity['reqNr']}/{activity['reqLg']}/{activity['reqSl']}"
                 act_date = activity['reqDt'].split()[0]
-                act_desc = dequote(activity['reqAs']).strip()
+                act_desc = dequote(activity['reqAs'])
             else:
                 logging.warning(f'Activity type not recognized: {mp_id}, {mp_name}, {act_id}, {act_type}')
-            mp_act_df.loc[len(mp_act_df)] = [
-                    mp_id,
-                    mp_name, 
-                    mp_party,
-                    mp_status,
-                    act_id,
-                    act_type,
-                    act_subtype,
-                    act_dar,
-                    act_date,
-                    act_desc
-                ]
+            
+            mp_id_column.append(mp_id)
+            mp_name_column.append(mp_name)
+            mp_party_column.append(mp_party)
+            mp_status_column.append(mp_status)
+            act_id_column.append(act_id)
+            act_type_column.append(act_type)
+            act_subtype_column.append(act_subtype)
+            act_dar_column.append(act_dar)
+            act_date_column.append(act_date)
+            act_desc_column.append(act_desc)
+                
 
-mp_act_df.to_csv(save_result_path, index=False)
+mp_act_df = pd.DataFrame({
+    'mp_id':mp_id_column,
+    'mp_name':mp_name_column,
+    'mp_party':mp_party_column,
+    'mp_status':mp_status_column,
+    'act_id':act_id_column,
+    'act_type':act_type_column,
+    'act_subtype':act_subtype_column,
+    'act_dar':act_dar_column,
+    'act_date':act_date_column,
+    'act_desc':act_desc_column
+})
+mp_act_df.to_csv(save_result_path, index=False, sep='|')
