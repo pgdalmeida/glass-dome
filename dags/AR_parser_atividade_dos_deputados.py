@@ -39,7 +39,8 @@ mp_id_column = []            # member of parliament (deputado) identifier from t
 mp_name_column = []          # member of parliament (deputado) name, the simplified name or parliamentary name 
 mp_party_column = []         # member of parliament (deputado) party
 mp_status_column = []        # member of parliament (deputado) status, as in currently active or not
-act_id_column = []           # activity identifier from the original data source
+act_id_column = []           # activity identifier created here by hashing the whole activity entry
+act_old_id_column = []       # activity identifier from the original data source
 act_type_column = []         # activity type, based on what data structure it was sourced from
 act_subtype_column = []      # activity subtype, further information on the type of activity
 act_dar_column = []          # best guess at where this activity can be found in the "Diario da Republica" (often dificult to find)
@@ -171,85 +172,88 @@ for i in json['ArrayOfAtividadeDeputado']['AtividadeDeputado']:
             act_desc = ''
             # each activity type has a different structure and therefore has to be read differently
             if act_type == 'par':
-                act_id = activity['actId']
+                act_old_id = activity['actId']
                 act_subtype = activity['actTpdesc']
                 act_dar = f"{activity['actNr']}/{activity['actSelLg']}"
                 act_date = activity['actDtent']
                 act_desc = dequote(activity['actAs'])
             elif act_type == 'adt':
-                act_id = activity['actId']
+                act_old_id = activity['actId']
                 act_subtype = activity['actTpdesc']
                 act_dar = f"{activity['actNr']}"
                 act_date = activity['accDtaud']
                 act_desc = dequote(get_fist_existing_key(activity, ['actAs', 'nomeEntidadeExterna']))
             elif act_type == 'adc':
-                act_id = activity['actId']
+                act_old_id = activity['actId']
                 act_subtype = activity['actTpdesc']
                 act_dar = f"{activity['actNr']}/{activity['actLg']}"
                 act_date = activity['accDtaud']
                 act_desc = dequote(get_fist_existing_key(activity, ['actAs', 'nomeEntidadeExterna']))
             elif act_type == 'tra':
-                act_id = activity['actId']
+                act_old_id = activity['actId']
                 act_subtype = activity['actTp']
                 act_dar = f"{activity['cmsAb']}/{activity['actLg']}"
                 act_date = activity['actDtdes1']
                 act_desc = dequote(activity['actAs'])
             elif act_type == 'eve':
-                act_id = activity['actId']
+                act_old_id = activity['actId']
                 act_subtype = activity['tevTp']
                 act_dar = f"{activity['cmsAb']}/{activity['actLg']}"
                 act_date = activity['actDtent']
                 act_desc = dequote(activity['actAs'])
             elif act_type == 'ini':
-                act_id = activity['iniId']
+                act_old_id = activity['iniId']
                 act_subtype = activity['iniTpdesc']
                 act_dar = f"{activity['iniNr']}/{activity['iniTp']}/{activity['iniSelLg']}/{activity['iniSelNr']}"
                 act_date = ''
                 act_desc = dequote(activity['iniTi'])
             elif act_type == 'int':
-                act_id = activity['intId']
+                act_old_id = activity['intId']
                 act_subtype = activity['tinDs']
                 act_dar = f"{activity['pubTp']}/{activity['pubNr']}/{activity['pubLg']}/{activity['pubSl']}"
                 act_date = activity['pubDtreu']
                 act_desc = dequote(get_fist_existing_key(activity, ['intSu']))
             elif act_type == 'rin':
-                act_id = activity['iniId']
+                act_old_id = activity['iniId']
                 act_subtype = activity['iniTp']
                 act_dar = f"{activity['iniNr']}/{activity['iniSelLg']}"
                 act_date = ''
                 act_desc = dequote(activity['iniTi'])
             elif act_type == 'rpe':
-                act_id = activity['petId']
-                act_subtype = 'peticao'
+                act_old_id = activity['petId']
+                act_subtype = 'relatores peticoes'
                 act_dar = f"{activity['petNr']}/{activity['petSelLgPk']}/{activity['petSelNrPk']}"
                 act_date = ''
                 act_desc = dequote(activity['petAspet'])
             elif act_type == 'rie':
-                act_id = activity['ineId']
-                act_subtype = activity['ineReferencia']
+                act_old_id = activity['ineId']
+                act_subtype = 'relatores iniciativas europeias'
                 act_dar = f"{activity['leg']}"
                 act_date = activity['ineDataRelatorio']
                 act_desc = dequote(activity['ineTitulo'])
             elif act_type == 'rcp':
-                act_id = activity['actId']
-                act_subtype = activity['actTp']
+                act_old_id = activity['actId']
+                act_subtype = 'relatores contas publicas'
                 act_dar = ''
                 act_date = ''
                 act_desc = dequote(activity['actAs'])
             elif act_type == 'req':
-                act_id = activity['reqId']
+                act_old_id = activity['reqId']
                 act_subtype = activity['reqPerTp']
                 act_dar = f"{activity['reqNr']}/{activity['reqLg']}/{activity['reqSl']}"
                 act_date = activity['reqDt'].split()[0]
                 act_desc = dequote(activity['reqAs'])
             else:
-                logging.warning(f'Activity type not recognized: {mp_id}, {mp_name}, {act_id}, {act_type}')
+                logging.warning(f'Activity type not recognized: {mp_id}, {mp_name}, {act_old_id}, {act_type}')
             
+            act_id = 
+
             mp_id_column.append(mp_id)
             mp_name_column.append(mp_name)
             mp_party_column.append(mp_party)
             mp_status_column.append(mp_status)
             act_id_column.append(act_id)
+            act_old_id_column.append(act_old_id)
             act_type_column.append(act_type)
             act_subtype_column.append(act_subtype)
             act_dar_column.append(act_dar)
