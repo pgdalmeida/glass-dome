@@ -81,7 +81,8 @@ for ini in json_data:
                 else:
                     pages = ''
 
-                dar_cat = re.sub(r'DAR ', '', entry['pubTipo']).sub(r' série ', '-', dar_cat)   # change format from "DAR II série A" to "II-A"
+                dar_cat = re.sub(r'DAR ', '', entry['pubTipo'])   # change format from "DAR II série A" to "II-A"
+                dar_cat = re.sub(r' série ', '-', dar_cat)
                 dar_ref += f"{pages}{entry['pubNr']}/{dar_cat}/{entry['pubLeg']}/{entry['pubSL']} "
 
             dar_ref = dar_ref.strip()
