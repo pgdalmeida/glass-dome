@@ -245,8 +245,6 @@ for i in json['ArrayOfAtividadeDeputado']['AtividadeDeputado']:
                 act_desc = dequote(activity['reqAs'])
             else:
                 logging.warning(f'Activity type not recognized: {mp_id}, {mp_name}, {act_old_id}, {act_type}')
-            
-            act_id = 
 
             mp_id_column.append(mp_id)
             mp_name_column.append(mp_name)
