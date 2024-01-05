@@ -1,5 +1,6 @@
 import json
 import pandas as pd
+from pathlib import Path
 import os
 import logging
 import re
@@ -91,6 +92,22 @@ for ini in json_data:
     publication_date_column.append(publication_date)
     dar_ref_column.append(dar_ref)
 
+    ######## author_list
+    mp_names = []
+    authors_list = []
+    if 'iniAutorDeputados' in ini:
+        mps = ini['iniAutorDeputados']['pt_gov_ar_objectos_iniciativas_AutoresDeputadosOut']
+        if type(mps) != list:
+            mps = [mps]
+        authors_list += mps
+    if 'iniAutorOutros' in ini:
+        authors_list += [ini['iniAutorOutros']]
+    
+    mp_names = [author['nome'] for author in authors_list]
+    author_list_column.append(' '.join(mp_names))
+    number_authors_column.append(len(mp_names))
+
+
 ini_df = pd.DataFrame({
     'id': id_column,
     'party': party_column,
@@ -98,7 +115,12 @@ ini_df = pd.DataFrame({
     'text_url': text_url_column,
     'entry_date': entry_date_column,
     'publication_date': publication_date_column,
-    'dar_ref': dar_ref_column
+    'dar_ref': dar_ref_column,
+    'authors': author_list_column,
+    'number_authors': number_authors_column,
+    'party': party_column
 })
-print(ini_df)
+directory = os.path.dirname(save_result_path)
+Path(directory).mkdir(parents=True, exist_ok=True)
+ini_df.to_csv(save_result_path, index=False, sep='|')
 

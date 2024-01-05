@@ -271,4 +271,5 @@ mp_act_df = pd.DataFrame({
     'act_date':act_date_column,
     'act_desc':act_desc_column
 })
+
 mp_act_df.to_csv(save_result_path, index=False, sep='|')
