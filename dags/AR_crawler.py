@@ -28,8 +28,6 @@ class ARSpider(scrapy.Spider):
     excluded_urls = []
     run_datetime = datetime.datetime.now().strftime('%Y_%m_%d_%H_%M_%S')
     
-    # Setup progress bar for the command line (estimated number of links to crawl = 7899)
-    pbar = tqdm(total=7899, unit='files')
     # set custom settings
     custom_settings = {
         'AUTOTHROTTLE_ENABLED': True,
@@ -43,6 +41,8 @@ class ARSpider(scrapy.Spider):
     crawler_output = ['crawl_time,file_path,parent_url,file_url']
 
     def start_requests(self):
+        # Setup progress bar for the command line (estimated number of links to crawl = 7899)
+        self.pbar = tqdm(total=7899, unit='files')
         start_urls = ['https://www.parlamento.pt/Cidadania/Paginas/DadosAbertos.aspx']
         for url in start_urls:
             yield scrapy.Request(url = url, callback = self.parse_root)
