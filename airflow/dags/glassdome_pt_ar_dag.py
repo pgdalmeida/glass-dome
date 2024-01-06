@@ -1,3 +1,7 @@
+# add scripts folder to PYTHONPATH
+import sys
+sys.path.insert(1, '/home/pedro/Projects/glass-dome/scripts')
+
 from airflow import DAG
 from airflow.operators.python import PythonOperator
 from datetime import datetime, timedelta
@@ -26,10 +30,10 @@ ar_crawler = PythonOperator(
     dag = dag
 )
 
-ar_downloader = PythonOperator(
-    task_id = 'ar_downloader',
-    python_callable = start_ar_crawler,
-    dag = dag
-)
+# ar_downloader = PythonOperator(
+#     task_id = 'ar_downloader',
+#     python_callable = start_ar_crawler,
+#     dag = dag
+# )
 
-ar_crawler >> ar_downloader
+ar_crawler #>> ar_downloader

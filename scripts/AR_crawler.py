@@ -35,7 +35,7 @@ class ARSpider(scrapy.Spider):
         'AUTOTHROTTLE_MAX_DELAY': 0.5,
         'DOWNLOAD_DELAY': 0.5,
         'LOG_LEVEL':'WARNING',
-        'LOG_FILE': os.path.join('..', 'AR_crawler_logs', f'{run_datetime}.log')
+        'LOG_FILE': os.path.join('..', 'logs', 'AR_crawler', 'logs', f'{run_datetime}.log')
         }
     # list that will gather all crawled files urls and directories in csv format to be written to a file at the end of the crawler run
     crawler_output = ['crawl_time,file_path,parent_url,file_url']
@@ -109,7 +109,7 @@ class ARSpider(scrapy.Spider):
     def closed(self, reason):
         '''Runs automatically uppon crawler finishing its run. Writes out to a csv the crawled files and their respective file stricture.'''
 
-        file_path = os.path.join('AR_crawler_runs', f'{self.run_datetime}.csv')
+        file_path = os.path.join('../logs/AR_crawler/runs', f'{self.run_datetime}.csv')
         with open(file_path, 'w') as f:
             f.write('\n'.join(self.crawler_output))
                 
