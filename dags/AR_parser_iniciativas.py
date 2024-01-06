@@ -100,11 +100,9 @@ for ini in json_data:
         if type(mps) != list:
             mps = [mps]
         authors_list += mps
-    if 'iniAutorOutros' in ini:
-        authors_list += [ini['iniAutorOutros']]
     
     mp_names = [author['nome'] for author in authors_list]
-    author_list_column.append(' '.join(mp_names))
+    author_list_column.append(', '.join(mp_names))
     number_authors_column.append(len(mp_names))
 
 
