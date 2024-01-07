@@ -26,7 +26,6 @@ class ARSpider(scrapy.Spider):
     
     name = 'arspider'
     excluded_urls = []
-    run_datetime = datetime.datetime.now().strftime('%Y_%m_%d_%H_%M_%S')
     
     # set custom settings
     custom_settings = {
@@ -34,13 +33,15 @@ class ARSpider(scrapy.Spider):
         'AUTOTHROTTLE_START_DELAY': 0.2,
         'AUTOTHROTTLE_MAX_DELAY': 0.5,
         'DOWNLOAD_DELAY': 0.5,
-        'LOG_LEVEL':'WARNING',
-        'LOG_FILE': os.path.join('..', 'logs', 'AR_crawler', 'logs', f'{run_datetime}.log')
+        'LOG_LEVEL':'WARNING'
         }
+
     # list that will gather all crawled files urls and directories in csv format to be written to a file at the end of the crawler run
     crawler_output = ['crawl_time,file_path,parent_url,file_url']
 
     def start_requests(self):
+        self.custom_settings['LOG_FILE'] = self.log_file
+
         # Setup progress bar for the command line (estimated number of links to crawl = 7899)
         self.pbar = tqdm(total=7899, unit='files')
         start_urls = ['https://www.parlamento.pt/Cidadania/Paginas/DadosAbertos.aspx']
@@ -108,18 +109,27 @@ class ARSpider(scrapy.Spider):
     
     def closed(self, reason):
         '''Runs automatically uppon crawler finishing its run. Writes out to a csv the crawled files and their respective file stricture.'''
-
-        file_path = os.path.join('../logs/AR_crawler/runs', f'{self.run_datetime}.csv')
-        with open(file_path, 'w') as f:
+        with open(run_file, 'w') as f:
             f.write('\n'.join(self.crawler_output))
                 
 def start_ar_crawler():
+    run_datetime = datetime.datetime.now().strftime('%Y_%m_%d_%H_%M_%S')
+    
+    # defining directories to save log files and run data
+    log_dir = os.path.join('..', 'logs', 'AR_crawler', 'logs')
+    run_dir = os.path.join('..', 'logs', 'AR_crawler', 'runs')
+    
+    # defining respective file paths
+    log_file = os.path.join(log_dir, f'{run_datetime}.log')
+    run_file = os.path.join(run_dir, f'{run_datetime}.csv')
+
     # make sure the 'crawler_runs' directory exists and if not create it
-    os.makedirs('../logs/AR_crawler/runs', exist_ok=True) 
-    os.makedirs('../logs/AR_crawler/logs', exist_ok=True)
+    os.makedirs(log_dir, exist_ok=True)
+    os.makedirs(run_dir, exist_ok=True) 
+    
     # Run the Spider
     process = CrawlerProcess()
-    process.crawl(ARSpider)
+    process.crawl(ARSpider, log_file=log_file, run_file=run_file)
     process.start()
 
 if __name__ == '__main__':
