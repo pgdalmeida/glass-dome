@@ -40,7 +40,8 @@ class ARSpider(scrapy.Spider):
     crawler_output = ['crawl_time,file_path,parent_url,file_url']
 
     def start_requests(self):
-        self.custom_settings['LOG_FILE'] = self.log_file
+        #self.custom_settings['LOG_FILE'] = self.log_file
+        #logging.getLogger('scrapy').setLevel(logging.WARNING)
 
         # Setup progress bar for the command line (estimated number of links to crawl = 7899)
         self.pbar = tqdm(total=7899, unit='files')
@@ -109,7 +110,7 @@ class ARSpider(scrapy.Spider):
     
     def closed(self, reason):
         '''Runs automatically uppon crawler finishing its run. Writes out to a csv the crawled files and their respective file stricture.'''
-        with open(run_file, 'w') as f:
+        with open(self.run_file, 'w') as f:
             f.write('\n'.join(self.crawler_output))
                 
 def start_ar_crawler():
